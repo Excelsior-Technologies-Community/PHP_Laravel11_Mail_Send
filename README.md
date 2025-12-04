@@ -1,66 +1,169 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel 11 Payment Gateway Integration (Razorpay)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**By:** Manasi Patel  
+**Date:** 2025  
+**Laravel Version:** 11  
 
-## About Laravel
+This project demonstrates a **Payment Management System** using Laravel 11 and Razorpay. Users can make payments, view active payments, and manage them with **soft delete and restore** functionality.  
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Payment form using Razorpay  
+- Save payments in database (pending → success)  
+- Display payments list (only active)  
+- Soft delete payments with popup confirmation  
+- Restore deleted payments (optional)  
+- Centered Bootstrap design  
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Prerequisites
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- PHP >= 8.1  
+- Composer  
+- MySQL or MariaDB  
+- Laravel 11  
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Installation & Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1. Install Laravel 11 & Navigate to Project
 
-### Premium Partners
+```bash
+composer create-project laravel/laravel laravel11-payment "^11.0"
+cd laravel11-payment
+2. Configure Database
+Update your .env file:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+env
 
-## Contributing
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=payment_app
+DB_USERNAME=root
+DB_PASSWORD=
+Create the database:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+sql
 
-## Code of Conduct
+CREATE DATABASE payment_app;
+3. Install Razorpay SDK
+bash
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+composer require razorpay/razorpay
+4. Create Payments Table Migration
+bash
 
-## Security Vulnerabilities
+php artisan make:migration create_payments_table --create=payments
+Edit the migration file (database/migrations/xxxx_create_payments_table.php) and include the following columns:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+id → Primary key
 
-## License
+amount → Decimal, max 10 digits, 2 decimal places
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+payment_method → String, nullable
+
+status → String, default pending
+
+created_by → Unsigned Big Integer, nullable
+
+updated_by → Unsigned Big Integer, nullable
+
+timestamps → Laravel created_at & updated_at
+
+softDeletes → For soft delete functionality (deleted_at)
+
+Run the migration:
+
+bash
+php artisan migrate
+5. Create Payment Model
+bash
+
+php artisan make:model Payment
+Model Notes:
+
+Use SoftDeletes trait for soft delete functionality.
+
+Fillable fields: amount, payment_method, status, created_by, updated_by.
+
+6. Create Payment Controller
+bash
+
+php artisan make:controller PaymentController
+Controller Responsibilities:
+
+Display payment form
+
+Process payment via Razorpay API
+
+Handle payment success callback
+
+List all payments
+
+Soft delete a payment
+
+Restore a soft-deleted payment
+
+7. Environment Variables for Razorpay
+Add Razorpay test keys to .env:
+
+env
+
+RAZORPAY_KEY=rzp_test_xxxxxxxxxxxxx
+RAZORPAY_SECRET=xxxxxxxxxxxxxxxx
+Replace with your actual Razorpay test keys.
+
+8. Run the Application
+bash
+
+php artisan serve
+Visit in browser:
+
+bash
+
+http://localhost:8000/payment
+Workflow
+User enters payment amount in the payment form.
+
+On submission, a Razorpay order is created via API.
+
+Payment is recorded in the database with status = pending.
+
+Razorpay checkout popup opens.
+
+After successful payment, payment status is updated to success.
+
+Admin can view all payments.
+
+Admin can soft delete payments or restore them.
+
+All Commands in One Place
+bash
+
+# 1. Install Laravel 11
+composer create-project laravel/laravel laravel11-payment "^11.0"
+cd laravel11-payment
+
+# 2. Install Razorpay SDK
+composer require razorpay/razorpay
+
+# 3. Create Migration for Payments Table
+php artisan make:migration create_payments_table --create=payments
+
+# 4. Run Migrations
+php artisan migrate
+
+# 5. Create Payment Model
+php artisan make:model Payment
+
+# 6. Create Payment Controller
+php artisan make:controller PaymentController
+
+# 7. Run Laravel Server
+php artisan serve
+✅ Congratulations!
