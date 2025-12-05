@@ -1,52 +1,45 @@
-Laravel 11 Mail Send Project
 
+# Laravel 11 Mail Send Project
 
-
-
-Project Name: Laravel11-Mail
-Author: Manasi Patel
-Date: 2025
+**Project Name:** Laravel11-Mail  
+**Author:** Manasi Patel  
+**Date:** 2025  
 
 A beginner-friendly Laravel 11 project that allows users to send emails via a form, log sent emails, and manage them. It includes Laravel Mailables, soft deletes, status management, and a clean Bootstrap 5 frontend.
 
-⭐ Features
+---
 
-Send emails using a form
+## ⭐ Features
+- Send emails using a form
+- Save email logs in the database
+- View all email logs with pagination
+- Soft delete, restore, and permanently delete email logs
+- Toggle email log status (Active/Inactive)
+- View details of a single email
+- Responsive UI with Bootstrap 5
+- Beginner-friendly, fully commented code
 
-Save email logs in the database
+---
 
-View all email logs with pagination
+## 🔥 Requirements
+- PHP 8.1+
+- Laravel 11
+- MySQL
+- Composer
+- SMTP account (e.g., Mailtrap for testing)
 
-Soft delete, restore, and permanently delete email logs
+---
 
-Toggle email log status (Active/Inactive)
+## 🚀 Installation Steps
 
-View details of a single email
-
-Responsive UI with Bootstrap 5
-
-Beginner-friendly, fully commented code
-
-🔥 Requirements
-
-PHP 8.1+
-
-Laravel 11
-
-MySQL
-
-Composer
-
-SMTP account (e.g., Mailtrap for testing)
-
-🚀 Installation Steps
-Step 1: Install Laravel 11
+### Step 1: Install Laravel 11
+```bash
 composer create-project laravel/laravel laravel11-mail "^11.0"
 cd laravel11-mail
-
 Step 2: Configure Database
-
 Edit .env:
+
+env
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -54,38 +47,56 @@ DB_PORT=3306
 DB_DATABASE=mail_app
 DB_USERNAME=root
 DB_PASSWORD=
-
-
 Create the database:
 
+sql
+
 CREATE DATABASE mail_app;
-
 Step 3: Create Migration for Mail Logs
+bash
+
 php artisan make:migration create_mail_logs_table --create=mails
+Migration file (database/migrations/..._create_mail_logs_table.php):
 
+php
 
-Edit migration (database/migrations/..._create_mail_logs_table.php):
+<?php
 
-Schema::create('mail_logs', function (Blueprint $table) {
-    $table->id();
-    $table->string('email');
-    $table->string('subject');
-    $table->longText('message');
-    $table->unsignedBigInteger('created_by')->nullable();
-    $table->unsignedBigInteger('updated_by')->nullable();
-    $table->softDeletes();
-    $table->tinyInteger('status')->default(1);
-    $table->timestamps();
-});
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('mail_logs', function (Blueprint $table) {
+            $table->id();
+            $table->string('email');
+            $table->string('subject');
+            $table->longText('message');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->softDeletes();
+            $table->tinyInteger('status')->default(1);
+            $table->timestamps();
+        });
+    }
 
+    public function down(): void
+    {
+        Schema::dropIfExists('mail_logs');
+    }
+};
 Run migration:
 
+bash
+
 php artisan migrate
-
 Step 4: Configure Mail Settings
-
 Edit .env:
+
+env
 
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io
@@ -96,13 +107,15 @@ MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS="from@example.com"
 MAIL_FROM_NAME="Laravel11-Mail"
 
-Step 5: Create Model & Controller
+Step 5: Create Model, Controller & Mailable
+bashe
 php artisan make:model MailLog -m
 php artisan make:controller MailController --resource --model=MailLog
 php artisan make:mail TestMail
+MailLog Model (app/Models/MailLog.php)
+php
 
-
-MailLog Model (app/Models/MailLog.php):
+<?php
 
 namespace App\Models;
 
@@ -117,9 +130,10 @@ class MailLog extends Model
         'email','subject','message','created_by','updated_by','status'
     ];
 }
+MailController (app/Http/Controllers/MailController.php)
+php
 
-
-MailController (app/Http/Controllers/MailController.php):
+<?php
 
 namespace App\Http\Controllers;
 
@@ -195,29 +209,51 @@ class MailController extends Controller
         return redirect()->back()->with('success','Status updated!');
     }
 }
+TestMail Mailable (app/Mail/TestMail.php)
+php
 
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Mail\Mailable;
+
+class TestMail extends Mailable
+{
+    public $details;
+
+    public function __construct($details) {
+        $this->details = $details;
+    }
+
+    public function build() {
+        return $this->subject($this->details['title'])
+                    ->view('emails.test');
+    }
+}
 Step 6: Routes (routes/web.php)
+php
+
 use App\Http\Controllers\MailController;
 
-// Mail Form
 Route::get('/email', [MailController::class,'index']);
 Route::post('/send-email', [MailController::class,'send']);
 
-// Mail Logs
 Route::get('/mail', [MailController::class,'list']);
 Route::get('/mail/view/{id}', [MailController::class,'view']);
 Route::get('/mail/delete/{id}', [MailController::class,'delete']);
 Route::get('/mail/restore/{id}', [MailController::class,'restore']);
 Route::get('/mail/force-delete/{id}', [MailController::class,'forceDelete']);
 Route::get('/mail/status/{id}', [MailController::class,'changeStatus']);
-
 Step 7: Blade Views
-resources/views/layouts/app.blade.php
+Layout (resources/views/layouts/app.blade.php)
+html
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>Laravel Mail App</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>Laravel Mail App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark w-100 shadow-sm text-center">
@@ -226,8 +262,9 @@ resources/views/layouts/app.blade.php
 <div class="container">@yield('content')</div>
 </body>
 </html>
+Send Form (resources/views/mails/form.blade.php)
+blade
 
-resources/views/mails/form.blade.php
 @extends('layouts.app')
 @section('content')
 <br>
@@ -247,8 +284,9 @@ resources/views/mails/form.blade.php
 </div>
 </div>
 @endsection
+Email Logs (resources/views/mails/index.blade.php)
+blade
 
-resources/views/mails/index.blade.php
 @extends('layouts.app')
 @section('content')
 <div class="card shadow-lg">
@@ -282,8 +320,9 @@ resources/views/mails/index.blade.php
 </div>
 </div>
 @endsection
+View Single Email (resources/views/mails/view.blade.php)
+blade
 
-resources/views/mails/view.blade.php
 @extends('layouts.app')
 @section('content')
 <div class="container my-5">
@@ -306,8 +345,9 @@ resources/views/mails/view.blade.php
 </div>
 </div>
 @endsection
+Success Page (resources/views/mails/success.blade.php)
+blade
 
-resources/views/mails/success.blade.php
 @extends('layouts.app')
 @section('content')
 <div class="row justify-content-center">
@@ -324,8 +364,9 @@ resources/views/mails/success.blade.php
 </div>
 </div>
 @endsection
+Email Template (resources/views/emails/test.blade.php)
+blade
 
-resources/views/emails/test.blade.php
 <!DOCTYPE html>
 <html>
 <head><title>{{ $details['title'] }}</title></head>
@@ -334,37 +375,24 @@ resources/views/emails/test.blade.php
 <p>{{ $details['body'] }}</p>
 </body>
 </html>
+Step 8: Run the Application
+bash
 
-Step 8: Mailable (app/Mail/TestMail.php)
-namespace App\Mail;
-use Illuminate\Mail\Mailable;
-
-class TestMail extends Mailable
-{
-    public $details;
-    public function __construct($details) { $this->details = $details; }
-    public function build() { return $this->subject($this->details['title'])->view('emails.test'); }
-}
-
-Step 9: Run the Application
 php artisan serve
+Visit in browser:
 
+Email Form: http://localhost:8000/email
 
-Visit:
-
-http://localhost:8000/email
-http://localhost:8000/mail
+Mail Logs: http://localhost:8000/mail
 
 ✅ Features Now Working
 
 Send emails via form
 
-View email logs
+View email logs with pagination
 
-Soft delete, restore, and permanently delete
+Soft delete, restore, and permanently delete emails
 
 Toggle status (Active/Inactive)
-
-Paginate logs
 
 Mobile responsive with Bootstrap 5
