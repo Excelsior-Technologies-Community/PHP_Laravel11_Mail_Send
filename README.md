@@ -1,4 +1,4 @@
-Laravel 11 Mail Send Project Tutorial
+PHP_Laravel12_Mail_Send
 ---
 By: Manasi Patel / Laravel11-Mail
 Date: 2025
