@@ -26,8 +26,8 @@ Installation & Setup
 ---
 1. Install Laravel 11
 ```
-composer create-project laravel/laravel laravel11-mail "^11.0"
-cd laravel11-mail
+composer create-project laravel/laravel PHP_Laravel12_Mail_Send "^11.0"
+cd PHP_Laravel12_Mail_Send
 ```
 3. Configure Database
 
