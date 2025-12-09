@@ -1,4 +1,4 @@
-PHP_Laravel12_Mail_Send
+PHP_Laravel11_Mail_Send
 ---
 By: Manasi Patel / Laravel11-Mail
 Date: 2025
@@ -26,8 +26,8 @@ Installation & Setup
 ---
 1. Install Laravel 11
 ```
-composer create-project laravel/laravel PHP_Laravel12_Mail_Send "^11.0"
-cd PHP_Laravel12_Mail_Send
+composer create-project laravel/laravel PHP_Laravel11_Mail_Send "^11.0"
+cd PHP_Laravel11_Mail_Send
 ```
 3. Configure Database
 
