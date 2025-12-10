@@ -9,7 +9,7 @@ A beginner-friendly Laravel 11 project that allows users to send emails via a fo
 
 ---
 
-## ⭐ Features
+##  Features
 - Send emails using a form
 - Save email logs in the database
 - View all email logs with pagination
@@ -21,7 +21,7 @@ A beginner-friendly Laravel 11 project that allows users to send emails via a fo
 
 ---
 
-## 🔥 Requirements
+##  Requirements
 - PHP 8.1+
 - Laravel 11
 - MySQL
@@ -30,15 +30,16 @@ A beginner-friendly Laravel 11 project that allows users to send emails via a fo
 
 ---
 
-## 🚀 Installation Steps
+##  Installation Steps
 
 ### Step 1: Install Laravel 11
-```bash
+```
 composer create-project laravel/laravel laravel11-mail "^11.0"
 cd laravel11-mail
+```
 Step 2: Configure Database
 Edit .env:
-
+```
 env
 
 DB_CONNECTION=mysql
@@ -50,15 +51,18 @@ DB_PASSWORD=
 Create the database:
 
 sql
-
+```
 CREATE DATABASE mail_app;
 Step 3: Create Migration for Mail Logs
-bash
+```
+
 
 php artisan make:migration create_mail_logs_table --create=mails
+```
+
 Migration file (database/migrations/..._create_mail_logs_table.php):
 
-php
+```
 
 <?php
 
@@ -88,14 +92,16 @@ return new class extends Migration
         Schema::dropIfExists('mail_logs');
     }
 };
+```
 Run migration:
 
-bash
+```
 
 php artisan migrate
+```
 Step 4: Configure Mail Settings
 Edit .env:
-
+```
 env
 
 MAIL_MAILER=smtp
@@ -106,14 +112,15 @@ MAIL_PASSWORD=your_mailtrap_password
 MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS="from@example.com"
 MAIL_FROM_NAME="Laravel11-Mail"
-
+```
 Step 5: Create Model, Controller & Mailable
-bashe
+```
 php artisan make:model MailLog -m
 php artisan make:controller MailController --resource --model=MailLog
 php artisan make:mail TestMail
+```
 MailLog Model (app/Models/MailLog.php)
-php
+```
 
 <?php
 
@@ -130,8 +137,9 @@ class MailLog extends Model
         'email','subject','message','created_by','updated_by','status'
     ];
 }
+```
 MailController (app/Http/Controllers/MailController.php)
-php
+```
 
 <?php
 
@@ -209,8 +217,9 @@ class MailController extends Controller
         return redirect()->back()->with('success','Status updated!');
     }
 }
+```
 TestMail Mailable (app/Mail/TestMail.php)
-php
+```
 
 <?php
 
@@ -231,8 +240,9 @@ class TestMail extends Mailable
                     ->view('emails.test');
     }
 }
+```
 Step 6: Routes (routes/web.php)
-php
+```
 
 use App\Http\Controllers\MailController;
 
@@ -245,9 +255,10 @@ Route::get('/mail/delete/{id}', [MailController::class,'delete']);
 Route::get('/mail/restore/{id}', [MailController::class,'restore']);
 Route::get('/mail/force-delete/{id}', [MailController::class,'forceDelete']);
 Route::get('/mail/status/{id}', [MailController::class,'changeStatus']);
+```
 Step 7: Blade Views
 Layout (resources/views/layouts/app.blade.php)
-html
+```
 
 <!DOCTYPE html>
 <html>
@@ -262,8 +273,9 @@ html
 <div class="container">@yield('content')</div>
 </body>
 </html>
+```
 Send Form (resources/views/mails/form.blade.php)
-blade
+```
 
 @extends('layouts.app')
 @section('content')
@@ -284,8 +296,9 @@ blade
 </div>
 </div>
 @endsection
+```
 Email Logs (resources/views/mails/index.blade.php)
-blade
+```
 
 @extends('layouts.app')
 @section('content')
@@ -320,8 +333,9 @@ blade
 </div>
 </div>
 @endsection
+```
 View Single Email (resources/views/mails/view.blade.php)
-blade
+```
 
 @extends('layouts.app')
 @section('content')
@@ -345,8 +359,9 @@ blade
 </div>
 </div>
 @endsection
+```
 Success Page (resources/views/mails/success.blade.php)
-blade
+```
 
 @extends('layouts.app')
 @section('content')
@@ -364,8 +379,9 @@ blade
 </div>
 </div>
 @endsection
+```
 Email Template (resources/views/emails/test.blade.php)
-blade
+```
 
 <!DOCTYPE html>
 <html>
@@ -375,18 +391,20 @@ blade
 <p>{{ $details['body'] }}</p>
 </body>
 </html>
+```
 Step 8: Run the Application
 bash
-
+```
 php artisan serve
+```
 Visit in browser:
-
+```
 Email Form: http://localhost:8000/email
 
 Mail Logs: http://localhost:8000/mail
-
-✅ Features Now Working
-
+```
+ Features Now Working
+```
 Send emails via form
 
 View email logs with pagination
@@ -396,3 +414,4 @@ Soft delete, restore, and permanently delete emails
 Toggle status (Active/Inactive)
 
 Mobile responsive with Bootstrap 5
+```
