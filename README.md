@@ -403,6 +403,18 @@ Email Form: http://localhost:8000/email
 
 Mail Logs: http://localhost:8000/mail
 ```
+
+You can see this type Output :
+
+Mail Logs: http://localhost:8000/mail :
+<img width="1917" height="965" alt="Screenshot 2025-12-04 113838" src="https://github.com/user-attachments/assets/b56e8271-874a-4b77-9de2-eb0b31abacc1" />
+
+Email Form: http://localhost:8000/email :
+<img width="1917" height="965" alt="Screenshot 2025-12-04 113838" src="https://github.com/user-attachments/assets/a4de7b35-9d30-45b1-87a5-e32265f23d87" />
+<img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/36e1f787-2236-4c28-a90c-faa3c9887f0b" />
+<img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/02c7a90a-7dd0-4870-902b-106cf071c62e" />
+
+
  Features Now Working
 ```
 Send emails via form
