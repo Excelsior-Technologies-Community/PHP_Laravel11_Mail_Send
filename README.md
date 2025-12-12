@@ -406,13 +406,13 @@ Mail Logs: http://localhost:8000/mail
 
 You can see this type Output :
 
-Mail Logs: http://localhost:8000/mail :
-<img width="1917" height="965" alt="Screenshot 2025-12-04 113838" src="https://github.com/user-attachments/assets/b56e8271-874a-4b77-9de2-eb0b31abacc1" />
-
 Email Form: http://localhost:8000/email :
-<img width="1917" height="965" alt="Screenshot 2025-12-04 113838" src="https://github.com/user-attachments/assets/a4de7b35-9d30-45b1-87a5-e32265f23d87" />
-<img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/36e1f787-2236-4c28-a90c-faa3c9887f0b" />
-<img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/02c7a90a-7dd0-4870-902b-106cf071c62e" />
+<img width="1913" height="959" alt="image" src="https://github.com/user-attachments/assets/7c228df4-5957-46ef-8404-72ccc6b37373" />
+<img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/addf6504-0c4d-49a4-91d0-b0076920b4c8" />
+
+Mail Logs: http://localhost:8000/mail :
+<img width="1919" height="968" alt="image" src="https://github.com/user-attachments/assets/6d65959c-8dbb-44fb-905b-ae608a86c314" />
+<img width="1894" height="964" alt="Screenshot 2025-12-04 114747" src="https://github.com/user-attachments/assets/71b00090-9125-4f86-9a36-970a5b3ce56e" />
 
 
  Features Now Working
