@@ -1,4 +1,3 @@
-
 # Laravel 11 Mail Send Project
 
 **Project Name:** Laravel11-Mail  
