@@ -1,9 +1,4 @@
-
 # Laravel 11 Mail Send Project
-
-**Project Name:** Laravel11-Mail  
-**Author:** Manasi Patel  
-**Date:** 2025  
 
 A beginner-friendly Laravel 11 project that allows users to send emails via a form, log sent emails, and manage them. It includes Laravel Mailables, soft deletes, status management, and a clean Bootstrap 5 frontend.
 
