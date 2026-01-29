@@ -125,6 +125,8 @@ example@gmail.com
 
  After enabling this, App Password option will appear
 
+<img width="1793" height="910" alt="Screenshot 2026-01-29 162503" src="https://github.com/user-attachments/assets/65b82e57-8314-4f2c-9678-d35184945fef" />
+
 
 ### Step 4.3: Generate Google App Password
 
@@ -153,6 +155,8 @@ Laravel 11 Mail App
 abcd efgh ijkl mnop
 
 ```
+
+<img width="1919" height="912" alt="Screenshot 2026-01-29 162424" src="https://github.com/user-attachments/assets/3f4097ac-7d1a-4fe2-8b0c-ee72a10e2b29" />
 
 Important:
 
