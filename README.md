@@ -156,7 +156,7 @@ abcd efgh ijkl mnop
 
 ```
 
-<img width="1919" height="912" alt="Screenshot 2026-01-29 162424" src="https://github.com/user-attachments/assets/3b0d9bc8-7ff6-496a-941a-4c9f553b8e9a" />
+<img width="1919" height="912" alt="Screenshot 2026-01-29 162424" src="https://github.com/user-attachments/assets/3f4097ac-7d1a-4fe2-8b0c-ee72a10e2b29" />
 
 Important:
 
