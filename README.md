@@ -21,7 +21,8 @@ A beginner-friendly Laravel 11 project that allows users to send emails via a fo
 - Laravel 11
 - MySQL
 - Composer
-- SMTP account (e.g., Mailtrap for testing)
+- SMTP account (Gmail SMTP with App Password)
+
 
 ---
 
@@ -48,11 +49,13 @@ Create the database:
 sql
 ```
 CREATE DATABASE mail_app;
+
+
+
 Step 3: Create Migration for Mail Logs
 ```
+php artisan make:migration create_mail_logs_table --create=mail_logs
 
-
-php artisan make:migration create_mail_logs_table --create=mails
 ```
 
 Migration file (database/migrations/..._create_mail_logs_table.php):
@@ -95,24 +98,101 @@ Run migration:
 php artisan migrate
 ```
 Step 4: Configure Mail Settings
-Edit .env:
-```
-env
 
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=your_mailtrap_username
-MAIL_PASSWORD=your_mailtrap_password
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="from@example.com"
-MAIL_FROM_NAME="Laravel11-Mail"
+
+### Step 4.1: Login to Gmail Account
+
+1. Open :https://mail.google.com
+
+2. Login with your Gmail account
+
+Example:
+
 ```
+example@gmail.com
+
+```
+
+### Step 4.2: Enable 2-Step Verification (Mandatory)
+
+1. Open https://myaccount.google.com/security
+
+2. Under “Signing in to Google”
+
+3. Enable 2-Step Verification
+
+4. Verify using OTP on mobile
+
+ After enabling this, App Password option will appear
+
+
+### Step 4.3: Generate Google App Password
+
+1. Open https://myaccount.google.com/apppasswords
+
+2. Login again if asked
+
+3. Select:
+
+ 	App: Mail
+
+	Device: Other (Custom)
+
+4. Enter name:
+
+```
+Laravel 11 Mail App
+
+```
+
+5. Click Generate
+
+### Google will generate a 16-digit password like:
+
+```
+abcd efgh ijkl mnop
+
+```
+
+Important:
+
+Copy this password
+
+Do NOT share it
+
+This is your MAIL_PASSWORD
+
+
+### Open .env file and update mail configuration:
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=yourgmail@gmail.com
+MAIL_PASSWORD=your_16_digit_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=yourgmail@gmail.com
+MAIL_FROM_NAME="Laravel11 Mail App"
+
+
+```
+
+### Step 4.4: Clear Configuration Cache
+
+```
+php artisan config:clear
+php artisan cache:clear
+
+```
+
+
+
 Step 5: Create Model, Controller & Mailable
 ```
-php artisan make:model MailLog -m
-php artisan make:controller MailController --resource --model=MailLog
+php artisan make:model MailLog
+php artisan make:controller MailController
 php artisan make:mail TestMail
+
 ```
 MailLog Model (app/Models/MailLog.php)
 ```
