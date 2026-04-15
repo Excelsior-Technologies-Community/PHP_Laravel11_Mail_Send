@@ -19,42 +19,54 @@ class MailController extends Controller
         return view('mail.form'); // your form.blade.php
     }
 
-    public function send(Request $request)
-    {
-        $request->validate([
-            'email'   => 'required|email',
-            'subject' => 'required',
-            'message' => 'required',
-        ]);
-
-        // Save log
-        $log = MailLog::create([
-            'email'      => $request->email,
-            'subject'    => $request->subject,
-            'message'    => $request->message,
-            'created_by' => 1,   // dummy (you can use Auth later)
-            'status'     => 1
-        ]);
-
-        // Mail Details
-        $details = [
-            'title' => $request->subject,
-            'body'  => $request->message,
-        ];
-
-        // Send Email
-        Mail::to($request->email)->send(new TestMail($details));
-
-        return view('mail.success');
-    }
-
   
 
-    public function list()
+    public function send(Request $request)
 {
-    $mails = MailLog::where('status', 1)
-                    ->orderBy('id', 'ASC')
-                    ->paginate(10);
+    $request->validate([
+        'email'   => 'required|email',
+        'subject' => 'required',
+        'message' => 'required',
+        'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
+    ]);
+
+    MailLog::create([
+        'email'      => $request->email,
+        'subject'    => $request->subject,
+        'message'    => $request->message,
+        'created_by' => 1,
+        'status'     => 1
+    ]);
+
+    $details = [
+        'title' => $request->subject,
+        'body'  => $request->message,
+    ];
+
+    if ($request->hasFile('attachment')) {
+        $filePath = $request->file('attachment')->store('attachments', 'public');
+        $details['attachment'] = $filePath;
+    }
+
+    Mail::to($request->email)->send(new TestMail($details));
+
+    return view('mail.success');
+}
+
+  
+public function list(Request $request)
+{
+    $query = MailLog::where('status', 1);
+
+    // SEARCH LOGIC
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('email', 'like', '%' . $request->search . '%')
+              ->orWhere('subject', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $mails = $query->orderBy('id', 'ASC')->paginate(10);
 
     return view('mail.index', compact('mails'));
 }

@@ -10,7 +10,7 @@
             </div>
 
             <div class="card-body">
-                <form action="/send-email" method="POST">
+                <form action="/send-email" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-3">
@@ -26,6 +26,11 @@
                     <div class="mb-3">
                         <label>Message</label>
                         <textarea name="message" class="form-control" rows="5" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Attachment (PDF/Image)</label>
+                        <input type="file" name="attachment" class="form-control">
                     </div>
 
                     <button type="submit" class="btn btn-success w-100">Send Email</button>

@@ -13,9 +13,18 @@ class TestMail extends Mailable
         $this->details = $details;
     }
 
-    public function build()
+  public function build()
     {
-        return $this->subject($this->details['title'])
-                    ->view('emails.test');
+        $mail = $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
+                     ->subject($this->details['title'])
+                     ->view('emails.test')
+                     ->with('details', $this->details); // ✅ VERY IMPORTANT
+
+        // 📎 Attachment
+        if (isset($this->details['attachment'])) {
+            $mail->attach(storage_path('app/public/' . $this->details['attachment']));
+        }
+
+        return $mail;
     }
 }
