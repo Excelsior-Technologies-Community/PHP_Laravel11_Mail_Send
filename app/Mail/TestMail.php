@@ -2,32 +2,29 @@
 
 namespace App\Mail;
 
-use Illuminate\Mail\Mailable; // Import the Mailable class from Laravel
+use Illuminate\Mail\Mailable;
 
 class TestMail extends Mailable
 {
-    public $details; // Public property to hold email details, accessible in the view
+    public $details;
 
-    /**
-     * Constructor to initialize email details
-     *
-     * @param array $details - Contains information like 'title', 'body', etc.
-     */
     public function __construct($details)
     {
-        $this->details = $details; // Store the details in the class property
+        $this->details = $details;
     }
 
-    /**
-     * Build the email message.
-     *
-     * @return $this
-     */
-    public function build()
+  public function build()
     {
-        // Set the subject of the email using the 'title' from details
-        // Load the Blade view 'emails.test' for the email content
-        return $this->subject($this->details['title'])
-                    ->view('emails.test');
+        $mail = $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
+                     ->subject($this->details['title'])
+                     ->view('emails.test')
+                     ->with('details', $this->details); // ✅ VERY IMPORTANT
+
+        // 📎 Attachment
+        if (isset($this->details['attachment'])) {
+            $mail->attach(storage_path('app/public/' . $this->details['attachment']));
+        }
+
+        return $mail;
     }
 }
