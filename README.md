@@ -231,69 +231,136 @@ use Illuminate\Support\Facades\Mail;
 
 class MailController extends Controller
 {
-    public function index() {
-        return view('mails.form');
+    /**
+     * Display the email sending form.
+     */
+   public function index()
+    {
+        return view('mail.form');
     }
 
-    public function create() {
-        return view('mails.form');
-    }
-
-    public function send(Request $request) {
+    /**
+     * Handle the email sending process.
+     */
+    public function send(Request $request)
+    {
+        // 1. Validation
         $request->validate([
-            'email'=>'required|email',
-            'subject'=>'required',
-            'message'=>'required',
+            'email'         => 'required|email',
+            'subject'       => 'required|string|max:255',
+            'message'       => 'required',
+            'attachments.*' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120'
         ]);
 
-        $log = MailLog::create([
-            'email'=>$request->email,
-            'subject'=>$request->subject,
-            'message'=>$request->message,
-            'created_by'=>1,
-            'status'=>1,
-        ]);
+        try {
+            // 2. Process attachments
+            $attachmentPaths = [];
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    // Files are stored in storage/app/public/attachments
+                    $attachmentPaths[] = $file->store('attachments', 'public');
+                }
+            }
 
-        $details = [
-            'title'=>$request->subject,
-            'body'=>$request->message
-        ];
+            // 3. Prepare data for the email
+            $details = [
+                'title'       => $request->subject,
+                'body'        => $request->message,
+                'attachments' => $attachmentPaths,
+            ];
 
-        Mail::to($request->email)->send(new TestMail($details));
+            // 4. Create database log
+            MailLog::create([
+                'email'      => $request->email,
+                'subject'    => $request->subject,
+                'message'    => $request->message,
+                'created_by' => 1,
+                'status'     => 1
+            ]);
 
-        return view('mails.success');
+            // 5. Attempt to send the email
+            Mail::to($request->email)->send(new TestMail($details));
+
+            // If successful, return success view
+            return view('mail.success');
+
+        } catch (Exception $e) {
+            // IF MAIL FAILS, IT WILL SHOW THE REAL ERROR HERE
+            return "Mail Sending Failed! Error: " . $e->getMessage();
+        }
     }
 
-    public function list() {
-        $mails = MailLog::where('status',1)->orderBy('id','ASC')->paginate(10);
-        return view('mails.index', compact('mails'));
+    /**
+     * List all sent mail logs with search functionality.
+     */
+    public function list(Request $request)
+    {
+        $query = MailLog::where('status', 1);
+
+        // Filter logs based on search query (email or subject)
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('subject', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Paginate results (10 per page)
+        $mails = $query->orderBy('id', 'ASC')->paginate(10);
+
+        return view('mail.index', compact('mails'));
     }
 
-    public function view($id) {
+    /**
+     * View details of a single mail log entry.
+     */
+    public function view($id)
+    {
         $mail = MailLog::findOrFail($id);
-        return view('mails.view', compact('mail'));
+        return view('mail.view', compact('mail'));
     }
 
-    public function delete($id) {
-        MailLog::findOrFail($id)->delete();
-        return redirect()->back()->with('success','Mail deleted successfully!');
+    /**
+     * Soft delete a mail log.
+     */
+    public function delete($id)
+    {
+        $mail = MailLog::findOrFail($id);
+        $mail->delete();
+
+        return redirect()->back()->with('success', 'Mail deleted successfully!');
     }
 
-    public function restore($id) {
-        MailLog::withTrashed()->findOrFail($id)->restore();
-        return redirect()->back()->with('success','Mail restored successfully!');
+    /**
+     * Restore a soft-deleted mail log.
+     */
+    public function restore($id)
+    {
+        $mail = MailLog::withTrashed()->findOrFail($id);
+        $mail->restore();
+        return redirect()->back()->with('success', 'Email restored successfully!');
     }
 
-    public function forceDelete($id) {
-        MailLog::withTrashed()->findOrFail($id)->forceDelete();
-        return redirect()->back()->with('success','Mail permanently deleted!');
+    /**
+     * Permanently delete a mail log entry.
+     */
+    public function forceDelete($id)
+    {
+        $mail = MailLog::withTrashed()->findOrFail($id);
+        $mail->forceDelete();
+        return redirect()->back()->with('success', 'Email permanently deleted!');
     }
 
-    public function changeStatus($id) {
+    /**
+     * Toggle the status of a mail log (Active/Inactive).
+     */
+    public function changeStatus($id)
+    {
         $mail = MailLog::findOrFail($id);
         $mail->status = $mail->status == 1 ? 0 : 1;
         $mail->save();
-        return redirect()->back()->with('success','Status updated!');
+
+        return redirect()->back()->with('success', 'Status updated!');
     }
 }
 ```
@@ -304,19 +371,47 @@ TestMail Mailable (app/Mail/TestMail.php)
 
 namespace App\Mail;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
 
 class TestMail extends Mailable
 {
+    use Queueable, SerializesModels;
+
     public $details;
 
-    public function __construct($details) {
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($details)
+    {
         $this->details = $details;
     }
 
-    public function build() {
-        return $this->subject($this->details['title'])
-                    ->view('emails.test');
+    /**
+     * Build the message.
+     */
+    public function build()
+    {
+        // Ensure MAIL_FROM_ADDRESS is set in your .env
+        $mail = $this->from(config('mail.from.address'), config('mail.from.name'))
+                     ->subject($this->details['title'])
+                     ->view('emails.test')
+                     ->with('details', $this->details);
+
+        // Attach multiple files if available
+        if (isset($this->details['attachments']) && is_array($this->details['attachments'])) {
+            foreach ($this->details['attachments'] as $filePath) {
+                $fullPath = storage_path('app/public/' . $filePath);
+                
+                if (file_exists($fullPath)) {
+                    $mail->attach($fullPath);
+                }
+            }
+        }
+
+        return $mail;
     }
 }
 ```
@@ -357,23 +452,60 @@ Send Form (resources/views/mails/form.blade.php)
 ```
 
 @extends('layouts.app')
+
 @section('content')
 <br>
 <div class="row justify-content-center">
-<div class="col-md-6">
-<div class="card shadow-lg">
-<div class="card-header bg-primary text-white"><h4>Send Email</h4></div>
-<div class="card-body">
-<form action="/send-email" method="POST">@csrf
-<div class="mb-3"><label>Email Address</label><input type="email" name="email" class="form-control" required></div>
-<div class="mb-3"><label>Subject</label><input type="text" name="subject" class="form-control" required></div>
-<div class="mb-3"><label>Message</label><textarea name="message" class="form-control" rows="5" required></textarea></div>
-<button type="submit" class="btn btn-success w-100">Send Email</button>
-</form>
+    <div class="col-md-6">
+
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Send Email</h4>
+            </div>
+
+            <div class="card-body">
+                <form action="/send-email" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label>Email Address</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Subject</label>
+                        <input type="text" name="subject" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Message</label>
+                        <textarea name="message" id="editor" class="form-control" rows="5"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Attachments (PDF/Image)</label>
+                        <input type="file" name="attachments[]" class="form-control" multiple>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Send Email</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
 </div>
-</div>
-</div>
-</div>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+
+<script>
+    // Initialize CKEditor on the element with id "editor"
+    ClassicEditor
+        .create(document.querySelector('#editor'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+
 @endsection
 ```
 Email Logs (resources/views/mails/index.blade.php)
@@ -417,26 +549,70 @@ View Single Email (resources/views/mails/view.blade.php)
 ```
 
 @extends('layouts.app')
+
 @section('content')
 <div class="container my-5">
-<div class="row justify-content-center">
-<div class="col-lg-7 col-md-9">
-<div class="card shadow-lg rounded-4">
-<div class="card-header text-white text-center py-4 rounded-top-4" style="background: linear-gradient(90deg, #4e73df, #1cc88a);">
-<h3>Email Details</h3>
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card border-0 shadow-lg rounded-4">
+
+                <div class="card-header text-white text-center py-4 rounded-top-4" style="background: linear-gradient(90deg, #4e73df, #1cc88a);">
+                    <h3 class="mb-0"><i class="bi bi-envelope-fill me-2"></i>Email Details</h3>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold">Recipient Email</h6>
+                        <div class="p-3 border rounded bg-light text-break">{{ $mail->email }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold">Subject</h6>
+                        <div class="p-3 border rounded bg-light text-break">{{ $mail->subject }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold">Message</h6>
+                        <div class="p-3 border rounded bg-light">
+                            {!! $mail->message !!}
+                        </div>
+                    </div>
+
+                    <div class="row mb-4 g-3 text-center">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded shadow-sm bg-white">
+                                <h6 class="text-muted fw-bold mb-2"><i class="bi bi-toggle-on me-2"></i>Status</h6>
+                                @if($mail->status == 1)
+                                    <span class="badge bg-success px-3 py-2 fs-6">Active</span>
+                                @else
+                                    <span class="badge bg-danger px-3 py-2 fs-6">Inactive</span>
+                                @endif
+
+                                @if($mail->deleted_at)
+                                    <span class="badge bg-warning text-dark px-3 py-2 fs-6 ms-1">Deleted</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded shadow-sm bg-white">
+                                <h6 class="text-muted fw-bold mb-2"><i class="bi bi-calendar-check me-2"></i>Created At</h6>
+                                <div>{{ $mail->created_at->format('d-m-Y H:i A') }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+                        <a href="{{ url('/mail') }}" class="btn btn-secondary btn-lg shadow-sm">Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="card-body p-4">
-<p><strong>Recipient:</strong> {{ $mail->email }}</p>
-<p><strong>Subject:</strong> {{ $mail->subject }}</p>
-<p><strong>Message:</strong></p>
-<div style="white-space: pre-wrap;">{{ $mail->message }}</div>
-<p><strong>Status:</strong> @if($mail->status==1)Active @else Inactive @endif</p>
-<p><strong>Created At:</strong> {{ $mail->created_at->format('d-m-Y H:i A') }}</p>
-<a href="/mail" class="btn btn-secondary">Back</a>
-</div>
-</div>
-</div>
-</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 @endsection
 ```
 Success Page (resources/views/mails/success.blade.php)
@@ -463,11 +639,97 @@ Email Template (resources/views/emails/test.blade.php)
 ```
 
 <!DOCTYPE html>
-<html>
-<head><title>{{ $details['title'] }}</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ $details['title'] }}</title>
+    <style>
+        /* Reset some styles for email clients */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .email-header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .email-footer {
+            background-color: #f1f1f1;
+            color: #555555;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff !important;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
 <body>
-<h2>{{ $details['title'] }}</h2>
-<p>{{ $details['body'] }}</p>
+    <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f4">
+        <tr>
+            <td>
+                <table class="email-container" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-header">
+                            <h1>{{ $details['title'] }}</h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="email-body">
+                            {!! $details['body'] !!}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="email-footer">
+                            &copy; {{ date('Y') }} Your Company. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
 ```

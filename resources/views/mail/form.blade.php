@@ -1,4 +1,5 @@
 @extends('layouts.app')
+
 @section('content')
 <br>
 <div class="row justify-content-center">
@@ -25,12 +26,12 @@
 
                     <div class="mb-3">
                         <label>Message</label>
-                        <textarea name="message" class="form-control" rows="5" required></textarea>
+                        <textarea name="message" id="editor" class="form-control" rows="5"></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label>Attachment (PDF/Image)</label>
-                        <input type="file" name="attachment" class="form-control">
+                        <label>Attachments (PDF/Image)</label>
+                        <input type="file" name="attachments[]" class="form-control" multiple>
                     </div>
 
                     <button type="submit" class="btn btn-success w-100">Send Email</button>
@@ -40,5 +41,16 @@
 
     </div>
 </div>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+
+<script>
+    // Initialize CKEditor on the element with id "editor"
+    ClassicEditor
+        .create(document.querySelector('#editor'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
 
 @endsection
