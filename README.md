@@ -748,12 +748,16 @@ Mail Logs: http://localhost:8000/mail
 You can see this type Output :
 
 Email Form: http://localhost:8000/email :
-<img width="1913" height="959" alt="image" src="https://github.com/user-attachments/assets/7c228df4-5957-46ef-8404-72ccc6b37373" />
+<img width="1914" height="907" alt="Screenshot 2026-04-17 110313" src="https://github.com/user-attachments/assets/4163ddcc-732b-4a3e-a6bb-b4dda0f53af9" />
 <img width="1917" height="972" alt="Screenshot 2025-12-04 113812" src="https://github.com/user-attachments/assets/addf6504-0c4d-49a4-91d0-b0076920b4c8" />
 
 Mail Logs: http://localhost:8000/mail :
 <img width="1919" height="968" alt="image" src="https://github.com/user-attachments/assets/6d65959c-8dbb-44fb-905b-ae608a86c314" />
-<img width="1894" height="964" alt="Screenshot 2025-12-04 114747" src="https://github.com/user-attachments/assets/71b00090-9125-4f86-9a36-970a5b3ce56e" />
+<img width="1901" height="910" alt="Screenshot 2026-04-17 110532" src="https://github.com/user-attachments/assets/82821018-28e7-4bac-a9e4-75982726b967" />
+
+<img width="1556" height="631" alt="Screenshot 2026-04-17 110216" src="https://github.com/user-attachments/assets/0908e18c-c46e-40d6-b736-13bc2c6b692d" />
+
+
 
 
  Features Now Working
