@@ -69,23 +69,18 @@
         <tr>
             <td>
                 <table class="email-container" cellpadding="0" cellspacing="0">
-                    <!-- Header -->
                     <tr>
                         <td class="email-header">
                             <h1>{{ $details['title'] }}</h1>
                         </td>
                     </tr>
 
-                    <!-- Body -->
                     <tr>
                         <td class="email-body">
-                            <p>{{ $details['body'] }}</p>
-                            <!-- Example button (optional) -->
-                            {{-- <a href="#" class="btn">View Details</a> --}}
+                            {!! $details['body'] !!}
                         </td>
                     </tr>
 
-                    <!-- Footer -->
                     <tr>
                         <td class="email-footer">
                             &copy; {{ date('Y') }} Your Company. All rights reserved.
